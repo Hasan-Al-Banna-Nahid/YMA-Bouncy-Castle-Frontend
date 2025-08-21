@@ -1,26 +1,52 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* -------------------------------
+   YMA Bouncy Castle • Tailwind v4
+   Design tokens live in @theme.
+   Tailwind v4 will generate utilities
+   like bg-brand, text-amber-600, etc.
+----------------------------------*/
+@theme {
+  /* Brand / CTA */
+  --color-brand: #f4a949; /* main amber/orange CTA (buttons) */
+  --color-brand-50: #fff3e0;
+  --color-brand-100: #ffe3be;
+  --color-brand-200: #ffd094;
+  --color-brand-300: #ffc067;
+  --color-brand-400: #f8b452;
+  --color-brand-500: #f4a949;
+  --color-brand-600: #e18f2f;
+  --color-brand-700: #c87320;
+  --color-brand-800: #a75b18;
+  --color-brand-900: #7f3e0e;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Gold accent (diagonal stripe divider) */
+  --color-gold: #f5c14a;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+  /* Logo teal */
+  --color-teal: #79c5c3;
+  --color-teal-600: #58b2af;
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Cream tile / light card bg from logo lockup */
+  --color-cream: #f2e3d7;
+
+  /* Neutrals used in header/footer and inputs */
+  --color-ink: #111213; /* near-black body text */
+  --color-ink-2: #1a1b1c; /* dark header/footer base */
+  --color-ink-3: #222426; /* header strip */
+  --color-muted: #6b7077; /* secondary text */
+  --color-line: #d9dde3; /* borders/inputs */
+  --color-bg: #ffffff; /* page background */
+  --color-panel: #0f1011; /* deepest footer panel */
+  --color-dark-bg: #1c1c1c;
+
+  /* Success/Warning/Error (optional, for messages) */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+
+  /* Fonts (optional) */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
 }
