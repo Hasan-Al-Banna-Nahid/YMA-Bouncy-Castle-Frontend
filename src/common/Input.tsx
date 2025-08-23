@@ -56,9 +56,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
                   >
                     {showPassword ? (
-                      <FiEyeOff size={16} />
+                      <FiEyeOff size={16} className=" text-gray-400" />
                     ) : (
-                      <FaEye size={16} />
+                      <FaEye size={16} className=" text-gray-400" />
                     )}
                   </Button>
                 )}
