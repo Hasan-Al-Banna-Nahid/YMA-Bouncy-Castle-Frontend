@@ -1,14 +1,21 @@
+/* Tailwind v4 core + animations */
 @import "tailwindcss";
+@import "tw-animate-css";
 
-/* -------------------------------
-   YMA Bouncy Castle • Tailwind v4
-   Design tokens live in @theme.
-   Tailwind v4 will generate utilities
-   like bg-brand, text-amber-600, etc.
-----------------------------------*/
+/* ---------------------------------
+   Dark variant helper (Tailwind v4)
+---------------------------------- */
+@custom-variant dark (&:is(.dark *));
+
+/* ---------------------------------
+   Brand tokens (Tailwind v4 @theme)
+   -> Generates utilities like:
+      bg-brand, text-brand-600,
+      bg-line, text-ink, etc.
+---------------------------------- */
 @theme {
-  /* Brand / CTA */
-  --color-brand: #f4a949; /* main amber/orange CTA (buttons) */
+  /* Brand / CTA (amber/orange) */
+  --color-brand: #f4a949;
   --color-brand-50: #fff3e0;
   --color-brand-100: #ffe3be;
   --color-brand-200: #ffd094;
@@ -20,33 +27,235 @@
   --color-brand-800: #a75b18;
   --color-brand-900: #7f3e0e;
 
-  /* Gold accent (diagonal stripe divider) */
-  --color-gold: #f5c14a;
+  /* Accents */
+  --color-gold: #f5c14a; /* diagonal stripe accent */
 
   /* Logo teal */
   --color-teal: #79c5c3;
   --color-teal-600: #58b2af;
 
-  /* Cream tile / light card bg from logo lockup */
+  /* Light card / tile */
   --color-cream: #f2e3d7;
 
-  /* Neutrals used in header/footer and inputs */
-  --color-ink: #111213; /* near-black body text */
+  /* Neutrals */
+  --color-ink: #0c1116; /* body text / headings */
   --color-ink-2: #1a1b1c; /* dark header/footer base */
-  --color-ink-3: #222426; /* header strip */
-  --color-muted: #6b7077; /* secondary text */
-  --color-line: #d9dde3; /* borders/inputs */
-  --color-bg: #ffffff; /* page background */
-  --color-panel: #0f1011; /* deepest footer panel */
-  --color-dark-bg: #1c1c1c;
+  --color-ink-3: #222426; /* top strips / bars */
+  --color-muted: #6b7785; /* secondary text */
+  --color-line: #e9eef3; /* borders / dividers */
+  --color-bg: #ffffff; /* page bg */
+  --color-panel: #0f1011; /* deepest panel blocks */
+  --color-dark-bg: #1c1c1c; /* site dark bg */
 
-  /* Success/Warning/Error (optional, for messages) */
+  /* State */
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
 
-  /* Fonts (optional) */
+  /* Typography (optional fallback) */
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* ---------------------------------
+   Inline semantic mirrors (optional)
+   Lets you use tokens like:
+   rounded-lg via --radius-*
+---------------------------------- */
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* These map tailwind's semantic colors to CSS vars below */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* ---------------------------------
+   Light theme (semantic vars for shadcn)
+   We map shadcn tokens to our brand palette.
+---------------------------------- */
+:root {
+  /* Radius scale for components */
+  --radius: 0.625rem;
+
+  /* Base & surfaces */
+  --background: var(--color-bg); /* white page */
+  --foreground: var(--color-ink); /* near-black text */
+
+  --card: var(--color-bg);
+  --card-foreground: var(--color-ink);
+
+  --popover: var(--color-bg);
+  --popover-foreground: var(--color-ink);
+
+  /* Primary (shadcn) => Map to brand (allowed) */
+  /* You prefer using `brand` utilities in your app code;
+     shadcn components internally use `--primary`, so we map it to brand. */
+  --primary: var(--color-brand);
+  --primary-foreground: #111111; /* dark text on amber for contrast */
+
+  /* Secondary / Muted / Accent */
+  --secondary: oklch(0.97 0 0); /* subtle neutral bg */
+  --secondary-foreground: var(--color-ink);
+
+  --muted: #f6f8fb; /* soft panel (slightly blue-ish like line) */
+  --muted-foreground: var(--color-muted);
+
+  --accent: #fff3e6; /* warm subtle accent */
+  --accent-foreground: var(--color-ink);
+
+  /* Status */
+  --destructive: #ef4444;
+
+  /* Inputs / borders / focus ring */
+  --border: var(--color-line);
+  --input: var(--color-line);
+  --ring: color-mix(in oklab, var(--color-brand) 50%, black 0%);
+
+  /* Charts (arbitrary but on-brand) */
+  --chart-1: #f4a949; /* brand */
+  --chart-2: #79c5c3; /* teal */
+  --chart-3: #f5c14a; /* gold */
+  --chart-4: #6b7785; /* muted */
+  --chart-5: #a75b18; /* brand-800 */
+
+  /* Sidebar (if you use shadcn sidebar primitives) */
+  --sidebar: var(--color-bg);
+  --sidebar-foreground: var(--color-ink);
+  --sidebar-primary: var(--color-brand);
+  --sidebar-primary-foreground: #111111;
+  --sidebar-accent: #f6f8fb;
+  --sidebar-accent-foreground: var(--color-ink);
+  --sidebar-border: var(--color-line);
+  --sidebar-ring: var(--ring);
+}
+
+/* ---------------------------------
+   Dark theme (semantic vars for shadcn)
+---------------------------------- */
+.dark {
+  --background: var(--color-dark-bg); /* #1c1c1c */
+  --foreground: #ffffff;
+
+  --card: #212223;
+  --card-foreground: #ffffff;
+
+  --popover: #212223;
+  --popover-foreground: #ffffff;
+
+  /* Keep primary brand consistent in dark; foreground flips to dark-ink for contrast if needed */
+  --primary: var(--color-brand);
+  --primary-foreground: #111111;
+
+  --secondary: #2a2b2d;
+  --secondary-foreground: #ffffff;
+
+  --muted: #2a2b2d;
+  --muted-foreground: #b6bcc5;
+
+  --accent: #242628;
+  --accent-foreground: #ffffff;
+
+  --destructive: #ef4444;
+
+  --border: oklch(1 0 0 / 12%); /* subtle hairline on dark */
+  --input: oklch(1 0 0 / 16%);
+  --ring: color-mix(in oklab, var(--color-brand) 60%, white 0%);
+
+  --chart-1: #f4a949; /* brand */
+  --chart-2: #79c5c3; /* teal */
+  --chart-3: #f5c14a; /* gold */
+  --chart-4: #9ea3aa; /* lighter muted */
+  --chart-5: #e18f2f; /* brand-600 */
+
+  --sidebar: #202122;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: var(--color-brand);
+  --sidebar-primary-foreground: #111111;
+  --sidebar-accent: #2a2b2d;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: var(--ring);
+}
+
+/* ---------------------------------
+   Base resets hooked into Tailwind
+---------------------------------- */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+
+  /* Text selection brand tint */
+  ::selection {
+    background: color-mix(in oklab, var(--color-brand) 35%, transparent);
+  }
+
+  /* Focus-visible ring (more obvious in keyboard nav) */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------------------------------
+   Small helpers (optional)
+---------------------------------- */
+
+/* Diagonal brand stripe (you used this in footer top) */
+.yma-stripe {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-gold) 0px,
+    var(--color-gold) 2px,
+    transparent 2px,
+    transparent 10px
+  );
+}
+
+/* Subtle shadow for cards/panels that matches your UI */
+.shadow-yma {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06), 0 4px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Smooth transform transitions (menus, drawers, search) */
+.transition-yma {
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
 }

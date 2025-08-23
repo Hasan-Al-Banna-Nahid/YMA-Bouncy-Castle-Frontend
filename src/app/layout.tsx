@@ -1,9 +1,11 @@
 import Footer from "@/components/footer";
 import Navbar from "@/components/navbar";
 import TopHeader from "@/components/top-header";
+import QueryProvider from "@/providers/query-provider";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const SITE_URL = "https://ymabouncycastles.uk";
@@ -155,8 +157,9 @@ export default function RootLayout({
         <div id="main-content">
           <TopHeader />
           <Navbar />
-          {children}
+          <QueryProvider>{children}</QueryProvider>
           <Footer />
+          <Toaster richColors position="top-right" />
         </div>
 
         {/* JSON-LD (SEO rich results) */}
