@@ -1,6 +1,6 @@
 "use client";
 
-import {api} from "@/api/api";
+import { api } from "@/api/api";
 import { Input } from "@/common/Input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
