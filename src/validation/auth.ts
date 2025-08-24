@@ -4,10 +4,7 @@ import * as yup from "yup";
 /** LOGIN */
 export const loginSchema: yup.ObjectSchema<LoginValues> = yup
   .object({
-    emailOrUsername: yup
-      .string()
-      .required("Username or email is required")
-      .max(140, "Too long"),
+    email: yup.string().required("Email is required").max(140, "Too long"),
     password: yup.string().required("Password is required"),
     remember: yup.boolean().optional(),
   })
