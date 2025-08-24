@@ -4,13 +4,12 @@ import TopHeader from "@/components/top-header";
 import QueryProvider from "@/providers/query-provider";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
 import { Toaster } from "sonner";
 import "./globals.css";
 
 const SITE_URL = "https://ymabouncycastles.uk";
 const brandName = "YMA Bouncy Castle";
-const defaultOG = `${SITE_URL}/og.jpg`; // place a 1200x630 image in /public/og.jpg
+const defaultOG = `${SITE_URL}/og.jpg`;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -92,7 +91,6 @@ export const metadata: Metadata = {
     ],
   },
   manifest: "/site.webmanifest",
-  themeColor: [{ media: "(prefers-color-scheme: light)", color: "#ffffff" }],
 };
 
 export const viewport: Viewport = {
@@ -106,54 +104,11 @@ export const viewport: Viewport = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // JSON-LD: Organization + WebSite (with SearchAction)
-  const orgJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: brandName,
-    url: SITE_URL,
-    logo: `${SITE_URL}/favicon-192x192.png`,
-    sameAs: [
-      "https://www.facebook.com/people/YMA-Bouncy-Castles-LTD/100092844622235/",
-      "https://www.instagram.com/yma.bouncycastles/",
-    ],
-    contactPoint: [
-      {
-        "@type": "ContactPoint",
-        telephone: "+44-7951-431111",
-        contactType: "customer service",
-        areaServed: ["GB"],
-        availableLanguage: ["en"],
-      },
-    ],
-  };
-
-  const websiteJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    url: SITE_URL,
-    name: brandName,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${SITE_URL}/?s={search_term_string}`,
-      "query-input": "required name=search_term_string",
-    },
-  };
-
   return (
     <html lang="en" dir="ltr">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* Skip link for a11y */}
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-black/80 focus:px-3 focus:py-2 focus:text-white"
-        >
-          Skip to content
-        </a>
-
-        {/* App */}
         <div id="main-content">
           <TopHeader />
           <Navbar />
@@ -161,18 +116,6 @@ export default function RootLayout({
           <Footer />
           <Toaster richColors position="top-right" />
         </div>
-
-        {/* JSON-LD (SEO rich results) */}
-        <Script
-          id="ld-org"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
-        />
-        <Script
-          id="ld-website"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
-        />
       </body>
     </html>
   );
