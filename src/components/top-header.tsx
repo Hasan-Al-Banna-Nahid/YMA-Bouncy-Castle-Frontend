@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   FaClock,
   FaFacebookF,
@@ -37,13 +38,13 @@ export default function TopHeader() {
             />
 
             {/* Login/Register */}
-            <a
-              href="/login"
+            <Link
+              href="/my-account"
               className="flex items-center gap-2 text-xs lg:text-sm hover:text-brand transition-colors"
             >
               <FaSignInAlt className="text-brand shrink-0" aria-hidden="true" />
               <span className="whitespace-nowrap">Login or Register</span>
-            </a>
+            </Link>
 
             {/* Divider */}
             <span
