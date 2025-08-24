@@ -1,3 +1,5 @@
+"use client";
+import { useAuthStore } from "@/store/auth-store";
 import Link from "next/link";
 import {
   FaClock,
@@ -8,8 +10,10 @@ import {
   FaWhatsapp,
   FaYoutube,
 } from "react-icons/fa";
+import { FaUser } from "react-icons/fa6";
 
 export default function TopHeader() {
+  const { user } = useAuthStore();
   return (
     // Hidden on mobile; visible from md and up
     <div className="hidden md:block w-full bg-dark-bg text-white">
@@ -38,13 +42,26 @@ export default function TopHeader() {
             />
 
             {/* Login/Register */}
-            <Link
-              href="/auth"
-              className="flex items-center gap-2 text-xs lg:text-sm hover:text-brand transition-colors"
-            >
-              <FaSignInAlt className="text-brand shrink-0" aria-hidden="true" />
-              <span className="whitespace-nowrap">Login or Register</span>
-            </Link>
+            {user ? (
+              <Link
+                href={"/my-account"}
+                className="flex items-center gap-2 text-xs lg:text-sm hover:text-brand transition-colors"
+              >
+                <FaUser className="text-brand shrink-0" aria-hidden="true" />
+                <span className="whitespace-nowrap">Account</span>
+              </Link>
+            ) : (
+              <Link
+                href="/auth"
+                className="flex items-center gap-2 text-xs lg:text-sm hover:text-brand transition-colors"
+              >
+                <FaSignInAlt
+                  className="text-brand shrink-0"
+                  aria-hidden="true"
+                />
+                <span className="whitespace-nowrap">Login or Register</span>
+              </Link>
+            )}
 
             {/* Divider */}
             <span
