@@ -111,7 +111,7 @@ export default function Navbar() {
       {/* ======================== DESKTOP (≥1024px) ======================== */}
       <div className="hidden lg:block">
         <div className="mx-auto w-full ">
-          <div className="grid grid-cols-[260px_1px_380px_1px_1fr_1px_64px_64px] items-center">
+          <div className="grid grid-cols-[260px_1px_380px_1px_1fr_1px_94px_94px] items-center">
             {/* Logo */}
             <div className="h-[90px] flex items-center justify-center">
               <Link
@@ -122,8 +122,6 @@ export default function Navbar() {
                 <Image
                   src={Logo}
                   alt="YMA Bouncy Castles"
-                  width={180}
-                  height={60}
                   priority
                   className="h-auto w-[180px]"
                 />
@@ -277,7 +275,7 @@ export default function Navbar() {
             {/* search & cart */}
             <button
               aria-label="Search"
-              className="flex h-[90px] w-[64px] items-center justify-center text-[#0c1116] hover:text-brand"
+              className="flex h-[90px] w-[94px] items-center justify-center text-[#0c1116] hover:text-brand"
               onClick={() => setIsSearchOpen(true)}
               type="button"
             >
@@ -286,7 +284,7 @@ export default function Navbar() {
             <Link
               href="/cart"
               aria-label="Cart"
-              className="flex h-[90px] w-[64px] items-center justify-center bg-brand text-white hover:bg-black transition duration-300"
+              className="flex h-[90px] w-[94px] items-center justify-center bg-brand text-white hover:bg-black transition duration-300"
             >
               <FaShoppingCart className="text-[18px]" />
             </Link>

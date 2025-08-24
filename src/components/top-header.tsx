@@ -39,7 +39,7 @@ export default function TopHeader() {
 
             {/* Login/Register */}
             <Link
-              href="/my-account"
+              href="/auth"
               className="flex items-center gap-2 text-xs lg:text-sm hover:text-brand transition-colors"
             >
               <FaSignInAlt className="text-brand shrink-0" aria-hidden="true" />
