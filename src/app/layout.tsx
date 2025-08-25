@@ -1,7 +1,6 @@
 import Footer from "@/components/footer";
 import Navbar from "@/components/navbar";
 import TopHeader from "@/components/top-header";
-import { AuthBootstrap } from "@/helpers/AuthBootstrap";
 import QueryProvider from "@/providers/query-provider";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -113,10 +112,7 @@ export default function RootLayout({
         <div id="main-content">
           <TopHeader />
           <Navbar />
-          <QueryProvider>
-            <AuthBootstrap />
-            {children}
-          </QueryProvider>
+          <QueryProvider>{children}</QueryProvider>
           <Footer />
           <Toaster richColors position="top-right" />
         </div>

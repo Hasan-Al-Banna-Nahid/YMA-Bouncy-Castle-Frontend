@@ -3,7 +3,8 @@
 import api from "@/api/api";
 import { useAuthStore } from "@/store/auth-store";
 import type { User } from "@/types/user";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 export const AUTH_QK = ["auth", "me"] as const;
 
@@ -15,10 +16,8 @@ export function useMeQuery(options?: { enabled?: boolean }) {
   const query = useQuery<User, unknown>({
     queryKey: AUTH_QK,
     queryFn: async () => {
-      const { data } = await api.get<User>("/auth/me", {
-        withCredentials: true,
-      });
-      return data;
+      const { data } = await api.get("/auth/me");
+      return data.data.user;
     },
     enabled: options?.enabled ?? true,
     // tune to preference
@@ -34,4 +33,23 @@ export function useMeQuery(options?: { enabled?: boolean }) {
   const refresh = () => qc.invalidateQueries({ queryKey: AUTH_QK });
 
   return { ...query, refresh };
+}
+
+export function useLogout() {
+  const router = useRouter();
+  const clear = useAuthStore((s) => s.clear);
+  const qc = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      await api.post("/auth/logout");
+    },
+    onSuccess: () => {
+      clear();
+      qc.invalidateQueries({ queryKey: AUTH_QK });
+      router.push("/auth");
+    },
+  });
+
+  return mutation;
 }
