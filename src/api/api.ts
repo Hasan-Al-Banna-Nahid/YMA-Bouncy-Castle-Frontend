@@ -1,67 +1,66 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 
-export const API_BASE = `${process.env.NEXT_PUBLIC_SERVER_URI}/api/v1`;
-
-export const api = axios.create({
-  baseURL: API_BASE,
+const api: AxiosInstance = axios.create({
+  baseURL: `${process.env.NEXT_PUBLIC_SERVER_URI}/api/v1`,
   withCredentials: true,
 });
 
-let accessToken: string | null = null;
-export const setAccessToken = (t: string | null) => {
-  accessToken = t;
-};
+let isRefreshing = false;
+let refreshSubscribers: (() => void)[] = [];
 
-api.interceptors.request.use((config) => {
-  if (accessToken) {
-    config.headers = config.headers ?? {};
-    (config.headers as any).Authorization = `Bearer ${accessToken}`;
+// !handle logout and prevent infinite loops
+const handleLogout = () => {
+  if (window.location.pathname !== "/auth") {
+    window.location.href = "/auth";
   }
-  return config;
-});
-
-// Auto-refresh on 401
-let refreshing = false;
-let waiters: Array<() => void> = [];
-
-const queue = () => new Promise<void>((resolve) => waiters.push(resolve));
-const flush = () => {
-  waiters.forEach((fn) => fn());
-  waiters = [];
 };
 
+// !handle adding a new access token to queued requests
+const subscribeTokenRefresh = (callback: () => void) => {
+  refreshSubscribers.push(callback);
+};
+
+// !execute queued requests after refresh
+const onRefreshSuccess = () => {
+  refreshSubscribers.forEach((callback) => callback());
+  refreshSubscribers = [];
+};
+
+// !handle api requests
+api.interceptors.request.use(
+  (config) => config,
+  (error) => Promise.reject(error)
+);
+
+// !handle expired tokens and refresh login
 api.interceptors.response.use(
-  (r) => r,
+  (response) => response,
   async (error) => {
-    const original = error.config;
-    if (error.response?.status === 401 && !original._retry) {
-      if (refreshing) {
-        await queue();
-        return api(original);
+    const originalRequest = error.config;
+
+    // ?prevent infinite retry loop
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve) => {
+          subscribeTokenRefresh(() => resolve(api(originalRequest)));
+        });
       }
-      original._retry = true;
-      refreshing = true;
+      originalRequest._retry = true;
+      isRefreshing = true;
       try {
-        // refresh uses cookies → must send withCredentials
-        const { data } = await axios.post<{ tokens?: { accessToken: string } }>(
-          `${API_BASE}/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
-        const newAT = data?.tokens?.accessToken; // or whatever your controller returns
-        if (!newAT) throw new Error("No access token in refresh response");
-        setAccessToken(newAT);
-        refreshing = false;
-        flush();
-        return api(original);
-      } catch (e) {
-        refreshing = false;
-        waiters = [];
-        setAccessToken(null);
-        // optional: redirect to login
-        return Promise.reject(e);
+        await api.post("/auth/refresh-token");
+        isRefreshing = false;
+        onRefreshSuccess();
+        return api(originalRequest);
+      } catch (error) {
+        isRefreshing = false;
+        refreshSubscribers = [];
+        handleLogout();
+        return Promise.reject(error);
       }
     }
     return Promise.reject(error);
   }
 );
+
+export default api;

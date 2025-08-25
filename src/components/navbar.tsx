@@ -132,7 +132,7 @@ export default function Navbar() {
             <div className="h-[90px] w-px bg-line" />
 
             {/* Support */}
-            <div className="h-[90px] flex items-center justify-center gap-3">
+            <div className="h-[90px] md:hidden lg:flex items-center justify-center gap-3">
               <FaHeadset
                 className="text-[42px] text-brand"
                 aria-hidden="true"
