@@ -4,6 +4,7 @@ import api from "@/api/api";
 import { Input } from "@/common/Input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth-store";
 import { LoginValues, RegisterValues } from "@/types/auth";
 import { loginSchema, registerSchema } from "@/validation/auth";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -18,7 +19,7 @@ import { toast } from "sonner";
 export default function AuthForm() {
   const [mode, setMode] = React.useState<"login" | "register">("login");
   const router = useRouter();
-
+  const { setUser } = useAuthStore();
   /* ------------------------------ LOGIN ------------------------------ */
   const loginForm = useForm<LoginValues>({
     resolver: yupResolver(loginSchema),
@@ -27,7 +28,7 @@ export default function AuthForm() {
   });
 
   const loginMutation = useMutation<
-    { message?: string }, // success payload shape (minimal)
+    { message?: string },
     AxiosError<{ message?: string }>,
     LoginValues
   >({
@@ -39,6 +40,7 @@ export default function AuthForm() {
       return data;
     },
     onSuccess(data) {
+      setUser(data?.data?.user);
       toast.success(data?.message ?? "Logged in successfully.");
       router.push("/my-account");
     },

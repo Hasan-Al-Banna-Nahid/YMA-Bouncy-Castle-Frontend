@@ -1,0 +1,43 @@
+/* Nice dual-ring spinner with subtle glow */
+.loader {
+  --size: 48px;
+  --ring: 4px;
+  --color: #2563eb; /* Tailwind's blue-600; change to your brand if needed */
+
+  width: var(--size);
+  height: var(--size);
+  border-radius: 9999px;
+  border: var(--ring) solid transparent;
+  border-top-color: var(--color);
+  color: var(--color);
+  animation: loader-spin 0.75s linear infinite;
+  position: relative;
+  box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+}
+
+.loader::after {
+  content: "";
+  position: absolute;
+  inset: calc(var(--ring) * -1.5);
+  border-radius: inherit;
+  border: var(--ring) solid transparent;
+  border-bottom-color: currentColor;
+  opacity: 0.35;
+  animation: loader-spin 1.5s linear infinite reverse;
+}
+
+/* reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .loader {
+    animation-duration: 2s;
+  }
+  .loader::after {
+    animation-duration: 3s;
+  }
+}
+
+@keyframes loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
