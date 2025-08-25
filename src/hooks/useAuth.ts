@@ -14,7 +14,7 @@ export function useAuth() {
       return data?.data?.user ?? null;
     },
     retry: false,
-    staleTime: 60_000,
+    staleTime: 600_000,
   });
 
   useEffect(() => {

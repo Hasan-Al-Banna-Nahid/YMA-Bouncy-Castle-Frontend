@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
 import { LoginValues, RegisterValues } from "@/types/auth";
+import { User } from "@/types/user";
 import { loginSchema, registerSchema } from "@/validation/auth";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation } from "@tanstack/react-query";
@@ -15,7 +16,8 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
-
+type NormalizedLogin = { user: User; message?: string };
+type ApiError = { message?: string };
 export default function AuthForm() {
   const [mode, setMode] = React.useState<"login" | "register">("login");
   const router = useRouter();
@@ -28,20 +30,21 @@ export default function AuthForm() {
   });
 
   const loginMutation = useMutation<
-    { message?: string },
-    AxiosError<{ message?: string }>,
+    NormalizedLogin,
+    AxiosError<ApiError>,
     LoginValues
   >({
     mutationFn: async (payload) => {
-      const { data } = await api.post<{ message?: string }>(
+      const res = await api.post<{ message?: string; data: { user: User } }>(
         "/auth/login",
         payload
       );
-      return data;
+      const body = res.data;
+      return { user: body.data.user, message: body.message };
     },
-    onSuccess(data) {
-      setUser(data?.data?.user);
-      toast.success(data?.message ?? "Logged in successfully.");
+    onSuccess({ user, message }) {
+      setUser(user);
+      toast.success(message ?? "Logged in successfully.");
       router.push("/my-account");
     },
     onError(error) {
