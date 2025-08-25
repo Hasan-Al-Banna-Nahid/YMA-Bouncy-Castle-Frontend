@@ -1,6 +1,6 @@
 "use client";
 
-import { api } from "@/api/api";
+import api from "@/api/api";
 import { Input } from "@/common/Input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -170,7 +170,9 @@ export default function AuthForm() {
                 className="h-14 w-full bg-brand text-white hover:bg-black transition duration-300"
                 disabled={loginMutation.isPending}
               >
-                {loginMutation.isPending ? "LOGGING IN..." : "LOG IN"}
+                {!loginMutation.isError && loginMutation.isPending
+                  ? "LOGGING IN..."
+                  : "LOG IN"}
               </Button>
 
               {loginMutation.isError && (
