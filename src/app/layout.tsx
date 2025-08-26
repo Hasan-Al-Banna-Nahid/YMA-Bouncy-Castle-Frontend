@@ -109,10 +109,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <div id="main-content">
-          <TopHeader />
-          <Navbar />
-          <QueryProvider>{children}</QueryProvider>
-          <Footer />
+          <QueryProvider>
+            <TopHeader />
+            <Navbar />
+            {children}
+            <Footer />
+          </QueryProvider>
           <Toaster richColors position="top-right" />
         </div>
       </body>

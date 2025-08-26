@@ -1,4 +1,5 @@
 "use client";
+import { useAuth } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/auth-store";
 import Link from "next/link";
 import {
@@ -14,6 +15,8 @@ import { FaUser } from "react-icons/fa6";
 
 export default function TopHeader() {
   const { user } = useAuthStore();
+  const { isLoading } = useAuth();
+
   return (
     // Hidden on mobile; visible from md and up
     <div className="hidden md:block w-full bg-dark-bg text-white">
@@ -42,9 +45,13 @@ export default function TopHeader() {
             />
 
             {/* Login/Register */}
-            {user ? (
+            {isLoading ? (
+              <span className="flex items-center gap-2 text-xs lg:text-sm text-gray-500">
+                Loading...
+              </span>
+            ) : user ? (
               <Link
-                href={"/my-account"}
+                href="/my-account"
                 className="flex items-center gap-2 text-xs lg:text-sm hover:text-brand transition-colors"
               >
                 <FaUser className="text-brand shrink-0" aria-hidden="true" />

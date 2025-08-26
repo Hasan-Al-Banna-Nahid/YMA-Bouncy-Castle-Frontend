@@ -4,8 +4,11 @@ import { User } from "@/types/user";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
-export function useAuth() {
+type Options = { enabled?: boolean };
+
+export function useAuth(opts: Options = {}) {
   const { setUser, clear } = useAuthStore();
+  const enabled = opts.enabled ?? true;
 
   const query = useQuery<User | null>({
     queryKey: ["user"],
@@ -15,15 +18,19 @@ export function useAuth() {
     },
     retry: false,
     staleTime: 600_000,
+    enabled,
   });
 
   useEffect(() => {
+    if (!enabled) return;
     if (query.isSuccess) setUser(query.data);
-  }, [query.isSuccess, query.data, setUser]);
+    if (query.data) setUser(query.data);
+  }, [enabled, query.isSuccess, query.data, setUser]);
 
   useEffect(() => {
+    if (!enabled) return;
     if (query.isError) clear();
-  }, [query.isError, clear]);
+  }, [enabled, query.isError, clear]);
 
   return query;
 }

@@ -43,9 +43,10 @@ export default function AuthForm() {
       return { user: body.data.user, message: body.message };
     },
     onSuccess({ user, message }) {
-      setUser(user);
+      console.log(user, "user logged in");
       toast.success(message ?? "Logged in successfully.");
-      router.push("/my-account");
+      router.push("/");
+      setUser(user);
     },
     onError(error) {
       const message =

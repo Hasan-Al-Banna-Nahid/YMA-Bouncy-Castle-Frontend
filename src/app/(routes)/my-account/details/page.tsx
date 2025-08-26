@@ -1,18 +1,23 @@
 "use client";
 
+import api from "@/api/api";
 import { BrandButton } from "@/common/BrandButton";
 import { Input } from "@/common/Input";
 import { useAuthStore } from "@/store/auth-store";
 import { AccountDetailsValues } from "@/types/user";
 import { accountDetailsSchema } from "@/validation/accountDetails";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 type FormValues = AccountDetailsValues;
 
 export default function AccountDetailsPage() {
-  const { user } = useAuthStore();
+  const { user, setUser } = useAuthStore();
+  const qc = useQueryClient();
 
   const methods = useForm<FormValues>({
     mode: "onBlur",
@@ -37,6 +42,7 @@ export default function AccountDetailsPage() {
     watch,
   } = methods;
 
+  // --- Pre-fill from store user ---
   const parsed = useMemo(() => {
     const full = (user?.name ?? "").trim();
     if (!full) return { firstName: "", lastName: "" };
@@ -60,6 +66,7 @@ export default function AccountDetailsPage() {
     });
   }, [user, parsed, reset]);
 
+  // --- Local preview for a newly chosen photo ---
   const fileList = watch("photo");
   const file = fileList?.[0];
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -74,20 +81,49 @@ export default function AccountDetailsPage() {
     return () => URL.revokeObjectURL(objUrl);
   }, [file]);
 
-  const onSubmit = handleSubmit(async (values) => {
-    // If you’re sending an image, use FormData
-    // const formData = new FormData();
-    // for (const [k, v] of Object.entries(values)) {
-    //   if (k === "photo") continue;
-    //   formData.append(k, String(v ?? ""));
-    // }
-    // if (values.photo?.[0]) formData.append("photo", values.photo[0]);
-    // await api.post("/account/details", formData);
+  const currentPhoto = previewUrl || (user as any)?.photo || "";
 
-    console.log("Submitted account details:", values);
+  // --- Mutation: /auth/update-me ---
+  type UpdateMeResponse = { message?: string; data?: { user?: any } };
+
+  const updateMe = useMutation<
+    UpdateMeResponse,
+    AxiosError<{ message?: string }>,
+    FormValues
+  >({
+    mutationFn: async (values) => {
+      const fd = new FormData();
+      fd.append("firstName", values.firstName ?? "");
+      fd.append("lastName", values.lastName ?? "");
+      fd.append("displayName", values.displayName ?? "");
+      fd.append("email", values.email ?? "");
+      if (values.currentPassword)
+        fd.append("currentPassword", values.currentPassword);
+      if (values.newPassword) fd.append("newPassword", values.newPassword);
+      if (values.confirmPassword)
+        fd.append("confirmPassword", values.confirmPassword);
+      if (values.photo && values.photo[0]) fd.append("photo", values.photo[0]);
+
+      const { data } = await api.post<UpdateMeResponse>("/auth/update-me", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+      });
+      return data;
+    },
+    onSuccess: (data) => {
+      const updated = data?.data?.user;
+      if (updated) setUser(updated);
+      qc.invalidateQueries({ queryKey: ["user"] });
+      toast.success(data?.message ?? "Account updated successfully.");
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message ?? "Failed to update account.");
+    },
   });
 
-  const currentPhoto = previewUrl || user?.photo;
+  const onSubmit = handleSubmit(async (values) => {
+    updateMe.mutate(values);
+  });
 
   return (
     <FormProvider {...methods}>
@@ -100,11 +136,16 @@ export default function AccountDetailsPage() {
                 PROFILE PHOTO
               </h2>
               <div className="flex items-center gap-4">
-                <img
-                  src={currentPhoto}
-                  alt="Profile"
-                  className="h-16 w-16 rounded-full object-cover border"
-                />
+                {currentPhoto ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={currentPhoto}
+                    alt="Profile"
+                    className="h-16 w-16 rounded-full object-cover border"
+                  />
+                ) : (
+                  <div className="h-16 w-16 rounded-full bg-gray-200 border" />
+                )}
                 <div>
                   <label
                     htmlFor="photo"
@@ -194,10 +235,12 @@ export default function AccountDetailsPage() {
             <div className="pt-2">
               <BrandButton
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || updateMe.isPending}
                 className="w-full sm:w-[240px]"
               >
-                {isSubmitting ? "SAVING..." : "SAVE CHANGES"}
+                {isSubmitting || updateMe.isPending
+                  ? "SAVING..."
+                  : "SAVE CHANGES"}
               </BrandButton>
             </div>
           </form>
