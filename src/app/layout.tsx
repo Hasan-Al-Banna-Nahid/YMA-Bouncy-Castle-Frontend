@@ -90,7 +90,6 @@ export const metadata: Metadata = {
       { rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#F4A949" },
     ],
   },
-  manifest: "/site.webmanifest",
 };
 
 export const viewport: Viewport = {

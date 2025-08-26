@@ -50,7 +50,6 @@ export default function AuthForm() {
     onError(error) {
       const message =
         error.response?.data?.message || "Login failed. Please try again.";
-      loginForm.setError("email", { message });
       toast.error(message);
     },
   });
@@ -96,8 +95,6 @@ export default function AuthForm() {
       const message =
         error.response?.data?.message ||
         "Registration failed. Please try again.";
-      // Surface at top via email field by default
-      registerForm.setError("email", { message });
       toast.error(message);
     },
   });
