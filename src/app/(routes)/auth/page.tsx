@@ -161,7 +161,7 @@ export default function AuthForm() {
                   Remember me
                 </label>
                 <Link
-                  href="/forgot-password"
+                  href="/auth/forgot-password"
                   className="text-sm underline-offset-4 hover:underline"
                 >
                   Lost your password?

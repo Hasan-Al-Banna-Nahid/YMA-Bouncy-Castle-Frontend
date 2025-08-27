@@ -9,12 +9,10 @@ export interface User {
 }
 
 export type AccountDetailsValues = {
-  firstName: string;
-  lastName: string;
-  displayName: string;
+  name: string;
   email: string;
-  currentPassword?: string;
-  newPassword?: string;
-  confirmPassword?: string;
-  photo?: FileList | null;
+  currentPassword: string | undefined;
+  newPassword: string | undefined;
+  confirmPassword: string | undefined;
+  photo: FileList | null | undefined;
 };

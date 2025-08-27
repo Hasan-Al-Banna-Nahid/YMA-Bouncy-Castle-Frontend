@@ -9,27 +9,28 @@ import { accountDetailsSchema } from "@/validation/accountDetails";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
-import { useEffect, useMemo, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { FormProvider, Resolver, useForm } from "react-hook-form";
 import { toast } from "sonner";
-
-type FormValues = AccountDetailsValues;
 
 export default function AccountDetailsPage() {
   const { user, setUser } = useAuthStore();
   const qc = useQueryClient();
 
-  const methods = useForm<FormValues>({
+  const methods = useForm<AccountDetailsValues>({
     mode: "onBlur",
-    resolver: yupResolver(accountDetailsSchema),
+    resolver: yupResolver(
+      accountDetailsSchema
+    ) as Resolver<AccountDetailsValues>,
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      displayName: "",
+      name: "",
       email: "",
+      // Keep text inputs controlled from the start
       currentPassword: "",
       newPassword: "",
       confirmPassword: "",
+      // File inputs should not be given a value prop; leaving as null here is fine
       photo: null,
     },
   });
@@ -42,31 +43,19 @@ export default function AccountDetailsPage() {
     watch,
   } = methods;
 
-  // --- Pre-fill from store user ---
-  const parsed = useMemo(() => {
-    const full = (user?.name ?? "").trim();
-    if (!full) return { firstName: "", lastName: "" };
-    const parts = full.split(/\s+/);
-    const firstName = parts[0] ?? "";
-    const lastName = parts.slice(1).join(" ");
-    return { firstName, lastName };
-  }, [user?.name]);
-
+  // Keep reset values in the same "shape" as defaultValues
   useEffect(() => {
     if (!user) return;
     reset({
-      firstName: parsed.firstName,
-      lastName: parsed.lastName,
-      displayName: user.name ?? "",
+      name: user.name ?? "",
       email: user.email ?? "",
       currentPassword: "",
       newPassword: "",
       confirmPassword: "",
-      photo: null,
+      photo: null, // leave file input uncontrolled
     });
-  }, [user, parsed, reset]);
+  }, [user, reset]);
 
-  // --- Local preview for a newly chosen photo ---
   const fileList = watch("photo");
   const file = fileList?.[0];
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -83,31 +72,28 @@ export default function AccountDetailsPage() {
 
   const currentPhoto = previewUrl || (user as any)?.photo || "";
 
-  // --- Mutation: /auth/update-me ---
   type UpdateMeResponse = { message?: string; data?: { user?: any } };
 
   const updateMe = useMutation<
     UpdateMeResponse,
     AxiosError<{ message?: string }>,
-    FormValues
+    AccountDetailsValues
   >({
     mutationFn: async (values) => {
       const fd = new FormData();
-      fd.append("firstName", values.firstName ?? "");
-      fd.append("lastName", values.lastName ?? "");
-      fd.append("displayName", values.displayName ?? "");
-      fd.append("email", values.email ?? "");
+      fd.append("name", values.name ?? "");
+
+      if (values.photo && values.photo[0]) {
+        fd.append("photo", values.photo[0]);
+      }
+
       if (values.currentPassword)
         fd.append("currentPassword", values.currentPassword);
       if (values.newPassword) fd.append("newPassword", values.newPassword);
       if (values.confirmPassword)
-        fd.append("confirmPassword", values.confirmPassword);
-      if (values.photo && values.photo[0]) fd.append("photo", values.photo[0]);
+        fd.append("newPasswordConfirm", values.confirmPassword);
 
-      const { data } = await api.post<UpdateMeResponse>("/auth/update-me", fd, {
-        headers: { "Content-Type": "multipart/form-data" },
-        withCredentials: true,
-      });
+      const { data } = await api.patch<UpdateMeResponse>("/auth/update-me", fd);
       return data;
     },
     onSuccess: (data) => {
@@ -122,6 +108,28 @@ export default function AccountDetailsPage() {
   });
 
   const onSubmit = handleSubmit(async (values) => {
+    const wantsPasswordChange =
+      !!values.currentPassword ||
+      !!values.newPassword ||
+      !!values.confirmPassword;
+
+    if (wantsPasswordChange) {
+      if (
+        !values.currentPassword ||
+        !values.newPassword ||
+        !values.confirmPassword
+      ) {
+        toast.error(
+          "To change your password, fill current, new, and confirm fields."
+        );
+        return;
+      }
+      if (values.newPassword !== values.confirmPassword) {
+        toast.error("New password and confirmation do not match.");
+        return;
+      }
+    }
+
     updateMe.mutate(values);
   });
 
@@ -137,11 +145,12 @@ export default function AccountDetailsPage() {
               </h2>
               <div className="flex items-center gap-4">
                 {currentPhoto ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={currentPhoto}
                     alt="Profile"
-                    className="h-16 w-16 rounded-full object-cover border"
+                    width={64}
+                    height={64}
+                    className="rounded-full object-cover border"
                   />
                 ) : (
                   <div className="h-16 w-16 rounded-full bg-gray-200 border" />
@@ -167,36 +176,24 @@ export default function AccountDetailsPage() {
               </div>
             </div>
 
-            {/* Top section (four fields) */}
             <div className="grid grid-cols-1 gap-6">
               <Input
-                name="firstName"
-                label="First name *"
-                placeholder="First name *"
-                autoComplete="given-name"
+                name="name"
+                label="Name *"
+                placeholder="Your full name"
+                autoComplete="name"
               />
-              <Input
-                name="lastName"
-                label="Last name *"
-                placeholder="Last name *"
-                autoComplete="family-name"
-              />
-              <Input
-                name="displayName"
-                label="Display name *"
-                placeholder="Display name *"
-                autoComplete="nickname"
-              />
-              <p className="text-[13px] italic text-black -mt-2">
-                This will be how your name will be displayed in the account
-                section and in reviews
-              </p>
               <Input
                 name="email"
-                label="Email address *"
-                placeholder="Email address *"
+                label="Email address"
+                placeholder="Email address"
                 autoComplete="email"
+                disabled
               />
+              <p className="text-[13px] italic text-black -mt-2">
+                You can update your name and profile photo. Email is not
+                editable.
+              </p>
             </div>
 
             {/* Divider-like spacing */}
@@ -211,14 +208,14 @@ export default function AccountDetailsPage() {
               <Input
                 name="currentPassword"
                 type="password"
-                label="Current password (leave blank to leave unchanged)"
+                label="Current password (leave blank to keep existing)"
                 placeholder=""
                 autoComplete="current-password"
               />
               <Input
                 name="newPassword"
                 type="password"
-                label="New password (leave blank to leave unchanged)"
+                label="New password (leave blank to keep existing)"
                 placeholder=""
                 autoComplete="new-password"
               />
