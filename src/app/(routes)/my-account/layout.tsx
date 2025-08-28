@@ -1,11 +1,15 @@
 "use client";
 
-import { useLogout } from "@/api/auth";
-import { AuthGate } from "@/helpers/AuthGate";
+import api from "@/api/api";
+import ProtectedRoute from "@/helpers/ProtectedRoute";
+
 import { useAuthStore } from "@/store/auth-store";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
+import { toast } from "sonner";
 
 const NAV = [
   { label: "Dashboard", href: "/my-account" },
@@ -17,31 +21,48 @@ const NAV = [
 
 export default function AccountLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const logout = useLogout();
-  const { user } = useAuthStore();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
+  const { user, clear } = useAuthStore();
   const username = user?.name || user?.email?.split("@")?.[0] || "Guest";
 
+  const logout = useMutation({
+    mutationFn: async () => {
+      await api.post("/auth/logout");
+    },
+    onSuccess: () => {
+      clear();
+      queryClient.removeQueries({ queryKey: ["user"] });
+      toast.success("Logged out successfully.");
+      router.push("/auth");
+    },
+    onError: () => {
+      toast.error("Failed to logout. Please try again.");
+    },
+  });
+
   return (
-    <AuthGate>
+    <ProtectedRoute>
       <section className="w-full">
         <div className="mx-auto w-full max-w-[1400px] px-4 md:px-6 lg:px-8 py-8 md:py-12">
           <div className="grid gap-10 md:gap-16 md:grid-cols-[260px_1fr]">
-            {/* Left rail (on md+) / Full-width stack (on mobile) */}
+            {/* Left rail */}
             <aside className="md:pt-1">
-              {/* Profile header (mobile + desktop) */}
+              {/* Profile header */}
               <div className="flex items-center gap-3 pb-6 border-b border-line md:border-0 md:pb-0">
-                {/* {user?.avatarUrl ? (
-                  // If you have a real avatar URL
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={user.avatarUrl}
-                    alt={`${username} avatar`}
-                    className="h-10 w-10 rounded-full object-cover"
+                <div className="h-10 w-10 rounded-full bg-[#e9eef3] grid place-items-center text-sm font-bold text-[#0c1116]">
+                  <Image
+                    src={
+                      user?.photo ||
+                      "https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg"
+                    }
+                    width={40}
+                    height={40}
+                    alt="profile"
+                    className="w-full h-full rounded-full"
                   />
-                ) : (
-                  <FaUserCircle className="h-10 w-10 text-[#c7ccd3]" />
-                )} */}
+                </div>
 
                 <div className="text-[14px] leading-tight">
                   <div className="text-[#6b7785]">Logged in as</div>
@@ -49,17 +70,17 @@ export default function AccountLayout({ children }: { children: ReactNode }) {
                 </div>
               </div>
 
-              {/* Logout link (brand) */}
+              {/* Logout */}
               <button
                 type="button"
                 onClick={() => logout.mutate()}
                 disabled={logout.isPending}
-                className="mt-4 text-[15px] font-semibold text-brand hover:opacity-90 md:mt-6"
+                className="mt-4 text-[15px] font-semibold text-brand hover:opacity-90 disabled:opacity-60 md:mt-6"
               >
                 {logout.isPending ? "Logging out..." : "Logout"}
               </button>
 
-              {/* Navigation — mobile & desktop share the same vertical list to match your screenshot */}
+              {/* Navigation */}
               <nav aria-label="Account" className="mt-4 md:mt-8">
                 <ul className="space-y-4 md:space-y-6">
                   {NAV.map((item) => {
@@ -82,16 +103,10 @@ export default function AccountLayout({ children }: { children: ReactNode }) {
             </aside>
 
             {/* Main content */}
-            <div className="md:pt-1">
-              {/*
-                On the dashboard page your copy should sit near the top,
-                matching the screenshot’s spacing/typography.
-              */}
-              {children}
-            </div>
+            <div className="md:pt-1">{children}</div>
           </div>
         </div>
       </section>
-    </AuthGate>
+    </ProtectedRoute>
   );
 }
