@@ -20,7 +20,8 @@ export default function PageHeader({
     <section
       className={clsx(
         "relative w-full text-white",
-        "min-h-[clamp(260px,42vh,520px)]",
+        "min-h-[clamp(180px,38svh,80px)]",
+        "sm:min-h-[clamp(240px,42svh,420px)]",
         className
       )}
     >
@@ -40,7 +41,7 @@ export default function PageHeader({
 
       {/* Content */}
       <div className="relative z-10 mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
-        <div className="pt-14 sm:pt-20 lg:pt-32 text-center">
+        <div className="pt-14 sm:pt-28 text-center">
           {/* Title: fluid type scales with viewport */}
           <h1 className="drop-shadow-sm font-bold leading-[1.05] break-words text-[clamp(22px,6vw,56px)]">
             {title}

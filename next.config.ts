@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ["st3.depositphotos.com", "res.cloudinary.com"],
+    domains: ["st3.depositphotos.com", "res.cloudinary.com", "i.pravatar.cc"],
   },
 };
 
