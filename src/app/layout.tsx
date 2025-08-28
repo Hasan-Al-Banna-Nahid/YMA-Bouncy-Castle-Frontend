@@ -90,7 +90,6 @@ export const metadata: Metadata = {
       { rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#F4A949" },
     ],
   },
-  manifest: "/site.webmanifest",
 };
 
 export const viewport: Viewport = {
@@ -110,10 +109,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <div id="main-content">
-          <TopHeader />
-          <Navbar />
-          <QueryProvider>{children}</QueryProvider>
-          <Footer />
+          <QueryProvider>
+            <TopHeader />
+            <Navbar />
+            {children}
+            <Footer />
+          </QueryProvider>
           <Toaster richColors position="top-right" />
         </div>
       </body>

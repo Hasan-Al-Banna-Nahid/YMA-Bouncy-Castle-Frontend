@@ -4,7 +4,9 @@ import api from "@/api/api";
 import { Input } from "@/common/Input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth-store";
 import { LoginValues, RegisterValues } from "@/types/auth";
+import { User } from "@/types/user";
 import { loginSchema, registerSchema } from "@/validation/auth";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation } from "@tanstack/react-query";
@@ -14,11 +16,12 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
-
+type NormalizedLogin = { user: User; message?: string };
+type ApiError = { message?: string };
 export default function AuthForm() {
   const [mode, setMode] = React.useState<"login" | "register">("login");
   const router = useRouter();
-
+  const { setUser } = useAuthStore();
   /* ------------------------------ LOGIN ------------------------------ */
   const loginForm = useForm<LoginValues>({
     resolver: yupResolver(loginSchema),
@@ -27,25 +30,27 @@ export default function AuthForm() {
   });
 
   const loginMutation = useMutation<
-    { message?: string }, // success payload shape (minimal)
-    AxiosError<{ message?: string }>,
+    NormalizedLogin,
+    AxiosError<ApiError>,
     LoginValues
   >({
     mutationFn: async (payload) => {
-      const { data } = await api.post<{ message?: string }>(
+      const res = await api.post<{ message?: string; data: { user: User } }>(
         "/auth/login",
         payload
       );
-      return data;
+      const body = res.data;
+      return { user: body.data.user, message: body.message };
     },
-    onSuccess(data) {
-      toast.success(data?.message ?? "Logged in successfully.");
-      router.push("/my-account");
+    onSuccess({ user, message }) {
+      console.log(user, "user logged in");
+      toast.success(message ?? "Logged in successfully.");
+      router.push("/");
+      setUser(user);
     },
     onError(error) {
       const message =
         error.response?.data?.message || "Login failed. Please try again.";
-      loginForm.setError("email", { message });
       toast.error(message);
     },
   });
@@ -91,8 +96,6 @@ export default function AuthForm() {
       const message =
         error.response?.data?.message ||
         "Registration failed. Please try again.";
-      // Surface at top via email field by default
-      registerForm.setError("email", { message });
       toast.error(message);
     },
   });
@@ -158,7 +161,7 @@ export default function AuthForm() {
                   Remember me
                 </label>
                 <Link
-                  href="/forgot-password"
+                  href="/auth/forgot-password"
                   className="text-sm underline-offset-4 hover:underline"
                 >
                   Lost your password?
