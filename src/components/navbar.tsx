@@ -109,9 +109,9 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-line text-[#0c1116]">
       {/* ======================== DESKTOP (≥1024px) ======================== */}
-      <div className="hidden lg:block">
+      <div className="hidden xl:block">
         <div className="mx-auto w-full ">
-          <div className="grid grid-cols-[260px_1px_380px_1px_1fr_1px_94px_94px] items-center">
+          <div className="grid grid-cols-[260px_1px_1fr_1px_94px_94px] 2xl:grid-cols-[260px_1px_380px_1px_1fr_1px_94px_94px] items-center">
             {/* Logo */}
             <div className="h-[90px] flex items-center justify-center">
               <Link
@@ -132,7 +132,7 @@ export default function Navbar() {
             <div className="h-[90px] w-px bg-line" />
 
             {/* Support */}
-            <div className="h-[90px] md:hidden lg:flex items-center justify-center gap-3">
+            <div className="h-[90px] md:hidden 2xl:flex items-center justify-center gap-3">
               <FaHeadset
                 className="text-[42px] text-brand"
                 aria-hidden="true"
@@ -146,7 +146,7 @@ export default function Navbar() {
                 </div>
               </div>
             </div>
-            <div className="h-[90px] w-px bg-line" />
+            <div className="h-[90px] w-px bg-line md:hidden 2xl:flex " />
             {/* Desktop menu */}
             <nav
               aria-label="Main"
@@ -275,25 +275,25 @@ export default function Navbar() {
             {/* search & cart */}
             <button
               aria-label="Search"
-              className="flex h-[90px] w-[94px] items-center justify-center text-[#0c1116] hover:text-brand"
+              className="flex h-[90px] w-[94px] items-center justify-center text-[#0c1116] hover:text-brand cursor-pointer"
               onClick={() => setIsSearchOpen(true)}
               type="button"
             >
-              <FaSearch className="text-[18px]" />
+              <FaSearch size={20} />
             </button>
             <Link
               href="/cart"
               aria-label="Cart"
               className="flex h-[90px] w-[94px] items-center justify-center bg-brand text-white hover:bg-black transition duration-300"
             >
-              <FaShoppingCart className="text-[18px]" />
+              <FaShoppingCart size={20} />
             </Link>
           </div>
         </div>
       </div>
 
       {/* ======================== MOBILE (<1024px) ======================== */}
-      <div className="lg:hidden">
+      <div className="xl:hidden">
         {/* top bar */}
         <div className="flex h-[64px] items-center justify-between px-4">
           <button
