@@ -110,14 +110,14 @@ export default function TestimonialsSection() {
           <button
             ref={prevRef}
             aria-label="Previous"
-            className="absolute left-[-6px] sm:left-[-20px] lg:left-[-48px] top-1/2 -translate-y-1/2 z-10 text-ink transition"
+            className="absolute left-[-6px] sm:left-[-20px] lg:left-[-48px] top-1/2 -translate-y-1/2 z-10 text-ink transition cursor-pointer"
           >
             <HiOutlineChevronLeft size={36} />
           </button>
           <button
             ref={nextRef}
             aria-label="Next"
-            className="absolute right-[-6px] sm:right-[-20px] lg:right-[-48px] top-1/2 -translate-y-1/2 z-10 text-ink hover:text-brand transition"
+            className="absolute right-[-6px] sm:right-[-20px] lg:right-[-48px] top-1/2 -translate-y-1/2 z-10 text-ink hover:text-brand transition cursor-pointer"
           >
             <HiOutlineChevronRight size={36} />
           </button>
