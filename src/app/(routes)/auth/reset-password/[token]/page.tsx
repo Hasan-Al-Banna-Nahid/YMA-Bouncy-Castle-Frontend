@@ -21,7 +21,7 @@ const schema: yup.ObjectSchema<ResetValues> = yup.object({
   password: yup
     .string()
     .required("New password is required")
-    .min(6, "Must be at least 6 characters"),
+    .min(8, "Must be at least 8 characters"),
   passwordConfirm: yup
     .string()
     .required("Please re-enter the new password")
@@ -53,7 +53,7 @@ export default function ResetPasswordPage() {
     mutationFn: async (payload) => {
       const { data } = await api.post<{ message?: string }>(
         `/auth/reset-password/${token}`,
-        payload,
+        payload
       );
       return data;
     },

@@ -2,7 +2,6 @@
 
 import api from "@/api/api";
 import { Input } from "@/common/Input";
-import { Button } from "@/components/ui/button";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
@@ -10,13 +9,14 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as yup from "yup";
 
+import { BrandButton } from "@/common/BrandButton";
+import PageHeader from "@/components/PageHeader";
 import {
   HiOutlineClock,
   HiOutlineLocationMarker,
   HiOutlineMail,
   HiOutlinePhone,
 } from "react-icons/hi";
-
 
 type ContactValues = {
   name: string;
@@ -31,7 +31,6 @@ const contactSchema: yup.ObjectSchema<ContactValues> = yup.object({
   subject: yup.string().trim().required("Subject is required"),
   message: yup.string().optional(),
 });
-
 
 export default function ContactPage() {
   const methods = useForm<ContactValues>({
@@ -53,10 +52,11 @@ export default function ContactPage() {
     ContactValues
   >({
     mutationFn: async (payload) => {
-      const { data } = await api.post<{ message?: string }>(
-        "/contact",
-        payload
-      );
+      const { data } = await api.post<{ message?: string }>("/mail/send", {
+        ...payload,
+        to: "kabir.ahmed110351@gmail.com",
+        fromName: "YMA",
+      });
       return data;
     },
     onSuccess: (data) => {
@@ -72,6 +72,7 @@ export default function ContactPage() {
 
   return (
     <section className="w-full">
+      <PageHeader title="Contact" crumbRight="CONTACT" />
       <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
         <div className="grid gap-8 lg:gap-10 lg:grid-cols-[320px_1fr]">
           {/* ---------------------------- Left: details ---------------------------- */}
@@ -217,7 +218,7 @@ export default function ContactPage() {
                       htmlFor="message"
                       className="text-sm font-medium text-foreground"
                     >
-                      Your message (optional)
+                      Your message
                     </label>
                     <Controller
                       control={control}
@@ -248,15 +249,14 @@ export default function ContactPage() {
                 </div>
 
                 <div className="mt-7">
-                  <Button
+                  <BrandButton
                     type="submit"
-                    className="h-[46px] px-7 bg-[var(--color-brand)] text-white font-extrabold tracking-wide hover:opacity-90"
                     disabled={isSubmitting || mutation.isPending}
                   >
                     {isSubmitting || mutation.isPending
                       ? "SENDING..."
                       : "SUBMIT"}
-                  </Button>
+                  </BrandButton>
                 </div>
               </div>
             </form>
