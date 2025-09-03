@@ -1,5 +1,5 @@
 // api.ts
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 
 const api: AxiosInstance = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_SERVER_URI}/api/v1`,
@@ -7,6 +7,8 @@ const api: AxiosInstance = axios.create({
 });
 
 const REFRESH_URL = "/auth/refresh-token";
+// Any 401 from these endpoints should NOT trigger refresh
+const NO_REFRESH_ON_401 = [REFRESH_URL, "/auth/login", "/auth/register"];
 
 let isRefreshing = false;
 let refreshSubscribers: Array<() => void> = [];
@@ -25,7 +27,12 @@ const onRefreshSuccess = () => {
   refreshSubscribers = [];
 };
 
-// Use a separate client for refresh OR guard the URL
+// Optional: extend request config with our _retry flag
+interface RetriableRequestConfig extends AxiosRequestConfig {
+  _retry?: boolean;
+}
+
+// Use a separate client for refresh (so its 401s aren’t intercepted)
 const refreshClient = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_SERVER_URI}/api/v1`,
   withCredentials: true,
@@ -33,28 +40,29 @@ const refreshClient = axios.create({
 
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest = error?.config;
+  async (error: AxiosError) => {
+    const originalRequest = error?.config as RetriableRequestConfig | undefined;
     const status = error?.response?.status;
 
-    // Not our case
     if (status !== 401 || !originalRequest) {
       return Promise.reject(error);
     }
 
-    // IMPORTANT: don't try to refresh if the failing request IS the refresh
-    if (originalRequest.url?.includes(REFRESH_URL)) {
-      // handleLogout();
+    const reqUrl = originalRequest.url ?? "";
+
+    // ⛔️ Never try to refresh for these endpoints (incl. refresh itself)
+    if (NO_REFRESH_ON_401.some((p) => reqUrl.includes(p))) {
+      // Optionally: handleLogout();
       return Promise.reject(error);
     }
 
-    // Prevent infinite retries on the same originalRequest
+    // Avoid infinite loops
     if (originalRequest._retry) {
       return Promise.reject(error);
     }
 
     if (isRefreshing) {
-      // Queue while a refresh is in-flight
+      // Queue the call until the current refresh finishes
       return new Promise((resolve) => {
         subscribeTokenRefresh(() => resolve(api(originalRequest)));
       });
@@ -65,14 +73,14 @@ api.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      await refreshClient.post(REFRESH_URL); // separate client avoids self-interception
+      await refreshClient.post(REFRESH_URL);
       isRefreshing = false;
       onRefreshSuccess();
-      return api(originalRequest); // replay original
+      return api(originalRequest); // replay the original request
     } catch (e) {
       isRefreshing = false;
       refreshSubscribers = [];
-      // handleLogout();
+      // Optionally: handleLogout();
       return Promise.reject(e);
     }
   }
